@@ -29,8 +29,9 @@ cdw
 cb
 nt
 ```
+## Using micro-ros with FreeRTOS
 
-## Creating a new firmware workspace
+### Creating a new firmware workspace
 
 ```bash
 ros2 run micro_ros_setup create_firmware_ws.sh freertos estp32
@@ -42,7 +43,7 @@ Each app is represented by a folder containing the following files:
 
 For the user to create its custom application, a folder <my_app> will need to be registered in this location, containing the two files just described. This is explained in [this section](#create-your-own-app)
 
-## Configuring the firmware
+### Configuring the firmware
 
 ```bash
 ros2 run micro_ros_setup configure_firmware.sh [APP] [OPTIONS]
@@ -61,7 +62,7 @@ For example:
 ros2 run micro_ros_setup configure_firmware.sh ping_pong --transport serial
 ```
 
-## Building and flashing the firmware
+### Building and flashing the firmware
 
 First, don't forget to connect the ESP32 with the USB.
 
@@ -73,7 +74,7 @@ ros2 run micro_ros_setup build_firmware.sh
 ros2 run micro_ros_setup flash_firmware.sh
 ```
 
-## Creating the micro-ROS agent
+### Creating the micro-ROS agent
 
 ```bash
 ros2 run micro_ros_setup create_agent_ws.sh
@@ -81,7 +82,7 @@ ros2 run micro_ros_setup build_agent.sh
 nt
 ```
 
-## Running the micro-ROS app
+### Running the micro-ROS app
 
 ```bash
 ros2 run micro_ros_agent micro_ros_agent serial --dev [device]
@@ -101,10 +102,9 @@ Example:
 ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyUSB0
 ```
 
-!!! warning
-    Remember that to run the micro ros agent correctly, you need to:
-    1. Run the agent with the command before
-    2. Reset the device. If you don't reset the device after running the micro ros agent, you won't receive an error but the app won't work and you'll see something like:
+:warning: Remember that to run the micro ros agent correctly, you need to:
+1. Run the agent with the command above.
+2. Reset the device. If you don't reset the device after running the micro ros agent, you won't receive an error but the app won't work and you'll see something like:
    
     ```bash
     [1748765297.034062] info     | TermiosAgentLinux.cpp | init                     | running...             | fd: 3
@@ -134,7 +134,7 @@ ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyUSB0
     [1748765368.978492] info     | ProxyClient.cpp    | create_datareader        | datareader created     | client_key: 0x3B092BB5, datareader_id: 0x001(6), subscriber_id: 0x001(4)
     ```
 
-## Use your own app
+### Use your own app
 
 To create or use your own app, and keep the code well organized in this repo you have to do the following.
 
@@ -161,3 +161,99 @@ ln -s $HOME/micro_ros_esp32_apps/ping_pong_test_app ping_pong_test_app
 ```
 
 3. Go back to step [configuring the firmware](#configuring-the-firmware) and do all the steps again.
+
+## Using micro-ros with Arduino IDE
+
+### Install the Arduino micro-ros library
+
+Go to your Arduino sktechbook location and download the micro-ros library according to your ROS DISTRO.
+
+You can check where your Arduino sktechbook location is if you open the Arduino IDE, and go to File > preferences.
+
+![sketchbook_location](images/sketchbook_location.png)
+
+```bash
+cd Arduino/libraries
+curl -L "https://github.com/micro-ROS/micro_ros_arduino/archive/refs/heads/${ROS_DISTRO}.zip" -o "micro_ros_arduino-${ROS_DISTRO}.zip"
+```
+
+Then, install the library from a .ZIP.
+
+![include_zip_library](images/include_zip_library.png)
+
+Go to the location of your Arduino libraries and install the micro_ros_arduino-$ROS_DISTRO.zip you have just download.
+
+### Select the correct Arduino core for the ESP32 version.
+
+The last version supported can be found [here](). Check the supported boards table and the ESP32 Dev Module.
+
+At the moment of writing this documentation, the version was v2.0.2.
+
+![esp32_version](images/esp32_version.png)
+
+### Load an example
+
+Go to Filw > example > micro_ros_arduino and open the micro-ros_publisher
+
+![micro_ros_publisher](images/micro_ros_publisher.png)
+
+Connect your ESP32, select the ESP32 Dev Module board and the correct port and upload the code.
+
+:warning: If you find an error at this point, check the [troubleshooting section]()
+
+### Run the example
+
+```bash
+ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyUSB0
+```
+
+:warning: Remember that to run the micro ros agent correctly, you need to:
+1. Run the agent with the command above.
+2. Reset the device. If you don't reset the device after running the micro ros agent, you won't receive an error but the app won't work
+
+### Troubleshooting
+
+If when loading the code you find this error:
+
+```cpp
+exec: "python": executable file not found in $PATH
+
+Compilation error: exec: "python": executable file not found in $PATH
+```
+
+This error means that the Arduino IDE (or the toolchain it's using) is trying to run python, but it can't find the Python executable in your system's PATH.
+
+Some systems (especially Ubuntu/Debian-based) only have python3 installed, but the Arduino tools expect python.
+
+You can fix this by creating a symbolic link:
+
+```bash
+sudo ln -s /usr/bin/python3 /usr/bin/python
+```
+
+If Python is not installed, install it
+
+```bash
+sudo apt update
+sudo apt install python3
+```
+
+If, after doing this you find this error:
+
+```cpp
+Traceback (most recent call last):
+  File "/home/juanma/.arduino15/packages/esp32/tools/esptool_py/3.1.0/esptool.py", line 38, in <module>
+    import serial
+ModuleNotFoundError: No module named 'serial'
+exit status 1
+
+Compilation error: exit status 1
+```
+
+This error means that the Python script used by the ESP32 toolchain is trying to import the serial module, but it’s not installed. This module comes from the pyserial package.
+
+install pyserial:
+
+```bash
+pip3 install pyserial
+```
