@@ -172,10 +172,23 @@ You can check where your Arduino sktechbook location is if you open the Arduino 
 
 ![sketchbook_location](images/sketchbook_location.png)
 
+In the Additional boards manager URLs you should introduce the following:
+```
+https://espressif.github.io/arduino-esp32/package_esp32_index.json
+```
+
+If you don't finf the libraries folder inside your Arduino sketchbook folder, create it:
+```bash
+cd
+cd Arduino
+mkdir libraries
+```
+
 ```bash
 cd Arduino/libraries
 curl -L "https://github.com/micro-ROS/micro_ros_arduino/archive/refs/heads/${ROS_DISTRO}.zip" -o "micro_ros_arduino-${ROS_DISTRO}.zip"
 ```
+
 
 Then, install the library from a .ZIP.
 
@@ -265,8 +278,9 @@ install pyserial:
 pip3 install pyserial
 ```
 
-### Using with WSL
+# Using micro-ros with WSL
 
+## Allow USB from WSL
 1. Install [usbipd-win](https://github.com/dorssel/usbipd-win/releases) in windows. Download the .msi package and install it.
 3. Connect the ESP32 with the USB.
 2. Open a command terminal in windows as admin (windows terminal) and run 
@@ -306,3 +320,39 @@ usbipd detach --busid <busid>
 ```
 
 More instructions [here](https://learn.microsoft.com/es-es/windows/wsl/connect-usb)
+
+## Install Arduino IDE in WSL
+ 
+1. You need to install FUSE
+  ```bash
+  sudo add-apt-repository universe
+  sudo apt install libfuse2
+  ```
+2. Download the AppImage 64 bits (X86-64) from the [Arduino Software page](https://www.arduino.cc/en/software).
+  ```bash
+  cd
+  wget https://downloads.arduino.cc/arduino-ide/arduino-ide_2.3.6_Linux_64bit.AppImage
+  ```
+3. You need to first make it an executable file. This is done by:
+  ```bash
+  chmod +x arduino-ide_2.3.6_Linux_64bit.AppImage
+  ```
+4. Now you can launch the arduino IDE from the WSL:
+  ```bash
+   ./arduino-ide_2.3.6_Linux_64bit.AppImage
+   ```
+
+5. For convenience, you can create an alias to launch the arduino-IDE
+  - Edit the `bashrc`
+  ```bash
+  gedit ~/.bashrc
+  ```
+  - Paste the alias command at the end of the file:
+  ```bash
+  alias arduino_ide='cd && ./arduino-ide_2.3.6_Linux_64bit.AppImage'
+  ```
+  - Save and close the file.
+6. You can easily open the Arduino IDE from the terminal using the `arduino_ide`alias:
+  ```bash
+  arduino_ide
+  ```
