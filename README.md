@@ -34,7 +34,7 @@ nt
 ### Creating a new firmware workspace
 
 ```bash
-ros2 run micro_ros_setup create_firmware_ws.sh freertos estp32
+ros2 run micro_ros_setup create_firmware_ws.sh freertos esp32
 ```
 Each app is represented by a folder containing the following files:
 
@@ -203,6 +203,13 @@ Connect your ESP32, select the ESP32 Dev Module board and the correct port and u
 
 ### Run the example
 
+First, you need yo create the micro-ROS agent
+```bash
+ros2 run micro_ros_setup create_agent_ws.sh
+ros2 run micro_ros_setup build_agent.sh
+nt
+```
+
 ```bash
 ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyUSB0
 ```
@@ -257,3 +264,45 @@ install pyserial:
 ```bash
 pip3 install pyserial
 ```
+
+### Using with WSL
+
+1. Install [usbipd-win](https://github.com/dorssel/usbipd-win/releases) in windows. Download the .msi package and install it.
+3. Connect the ESP32 with the USB.
+2. Open a command terminal in windows as admin (windows terminal) and run 
+  ```shell
+  usbipd list
+  ``` 
+3. One of the entries should be something like (the COM should be the one your ESP32 is connected at):
+  ```
+  2-2    10c4:ea60  Silicon Labs CP210x USB to UART Bridge (COM9)                 Not shared
+  ```
+4. Copy the BUSID number (in this case: `<busid>` = `2-2`) and run:
+  ```
+  bipd bind --busid <busid>
+  ```
+5. If you run `usbipd list` again you should see something like:
+  ```
+  2-2    10c4:ea60  Silicon Labs CP210x USB to UART Bridge (COM9)                 Shared
+  ```
+6. Attach the USB device to WSL (in this case: `<busid>` = `2-2`):
+  ```
+  usbipd attach --wsl --busid <busid>
+  ```
+7. If you run `usbipd list` again you should see something like:
+  ```
+  2-2    10c4:ea60  Silicon Labs CP210x USB to UART Bridge (COM9)                 Attached
+  ```
+8. If you open a WSL terminal (terminator) you'll be able to see the USB port at which the ESP32 is connected (usually `ttyUSB0` or `ttyACM0`):
+  ```
+  l /dev
+  ```
+
+:warning: As long as the USB device is connected to WSL, Windows can't use it. Once connected to WSL, any distribution running as WSL 2 can use the USB device. This means that if you want to upload a program to the device you MUST do it from the WSL. I.e., you can't updload a program from the Arduino IDE isntalled in windows, instead, you MUST do it drom the Arduino IDE installed in the WSL. 
+
+If you want to detach the ESP32 from the WSL, open a windows terminal and run:
+```
+usbipd detach --busid <busid>
+```
+
+More instructions [here](https://learn.microsoft.com/es-es/windows/wsl/connect-usb)
