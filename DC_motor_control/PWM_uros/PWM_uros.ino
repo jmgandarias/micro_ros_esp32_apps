@@ -1,3 +1,11 @@
+/*
+
+Command the desired PWM to the the motor (DC6V210RPM - Reducer 20:1)
+Author: Juan M. Gandarias
+email: jmgandarias@uma.es
+
+*/
+
 #include <micro_ros_arduino.h>
 
 #include <stdio.h>
