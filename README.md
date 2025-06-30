@@ -198,7 +198,7 @@ Go to the location of your Arduino libraries and install the micro_ros_arduino-$
 
 ### Select the correct Arduino core for the ESP32 version.
 
-The last version supported can be found [here](). Check the supported boards table and the ESP32 Dev Module.
+The last version supported can be found [here](https://github.com/micro-ROS/micro_ros_arduino/tree/humble). Check the supported boards table and the ESP32 Dev Module.
 
 At the moment of writing this documentation, the version was v2.0.2.
 
@@ -293,7 +293,7 @@ pip3 install pyserial
   ```
 4. Copy the BUSID number (in this case: `<busid>` = `2-2`) and run:
   ```
-  bipd bind --busid <busid>
+  usbipd bind --busid <busid>
   ```
 5. If you run `usbipd list` again you should see something like:
   ```
