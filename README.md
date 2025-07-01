@@ -356,3 +356,118 @@ More instructions [here](https://learn.microsoft.com/es-es/windows/wsl/connect-u
   ```bash
   arduino_ide
   ```
+
+## Using micro-ros over WiFi
+
+- First, you need to install nmap
+
+  ```bash
+  sudo apt install nmap
+  ```
+
+- In the `setup()` function of your arduino script, you should have this:
+
+  `set_microros_transports();`
+  You must change this line by:
+  `set_microros_wifi_transports("WIFI_SSID", "WIFI_PSSWD", "PC_IP", wifi_port);`
+
+  where:
+  - WIFI_SSID: Name of the WiFi network at which the ESP32 will connect. E.g., `"nombre_wifi"`
+  - WIFI_PSSWD: The password of the SSID. E.g., `"contraseña"`
+  - PC_IP: The IP of the PC at which the ESP32 will be connected to. You can use `ifconfig` to get it from the terminal. E.g., `"192.168.0.16"`
+  - 8888: The port at which the connection will be handled. You can leave that one.
+
+  :warning: I found some issues when trying to connect to a phone access point (i.e., a wifi network created by my smartphone).
+
+- Once the program is loaded to the ESP32, you'll need to run the micro-ros agent specifying the communication over WiFi:
+  
+  ```bash
+  ros2 run micro_ros_agent micro_ros_agent udp4 --port 8888 --dev <ESP32_IP>
+  ```
+
+- You can get the <ESP32_IP> with `nmap`
+  - Install `nmap` if you don't have it already installed in your computer: `sudo apt install nmap`
+  - With the ESP32 off, run (substitute PC_IP by your the IP off your PC - the one you have set in the arduino script previously)
+  
+  ```bash
+  sudo nmap -sn PC_IP/24
+  ```
+
+  You'll the list of devices that can be seen by your computer. In my case:
+
+  ```txt
+  Starting Nmap 7.80 ( https://nmap.org ) at 2025-07-01 18:01 CEST
+  Nmap scan report for www.adsl.vf (192.168.0.1)
+  Host is up (0.0065s latency).
+  MAC Address: E8:1B:69:45:EE:2A (Sercomm)
+  Nmap scan report for 192.168.0.10
+  Host is up (0.044s latency).
+  MAC Address: BC:10:2F:A6:34:6C (Unknown)
+  Nmap scan report for 192.168.0.11
+  Host is up (0.11s latency).
+  MAC Address: 10:5A:17:31:33:D5 (Unknown)
+  Nmap scan report for 192.168.0.12
+  Host is up (0.092s latency).
+  MAC Address: 10:5A:17:30:F0:EC (Unknown)
+  Nmap scan report for 192.168.0.14
+  Host is up (0.040s latency).
+  MAC Address: 70:3E:97:5C:6E:0B (Unknown)
+  Nmap scan report for 192.168.0.17
+  Host is up (0.086s latency).
+  MAC Address: 58:A8:E8:CB:9B:FF (Unknown)
+  Nmap scan report for 192.168.0.22
+  Host is up (0.094s latency).
+  MAC Address: 70:3E:97:5C:2C:D5 (Unknown)
+  Nmap scan report for 192.168.0.16
+  Host is up.
+  Nmap done: 256 IP addresses (8 hosts up) scanned in 28.81 seconds
+  ```
+
+  None of these is the ESP32.
+
+  - Now turn the ESP32 (and wait a couple of seconds until it connects to the WiFi network). Then, run this command again:
+  
+  ```bash
+  sudo nmap -sn PC_IP/24
+  ```
+
+  You'll see the list of devices that can be seen by your computer (in this case, the ESP32 is included). In my case:
+
+  ```txt
+  Starting Nmap 7.80 ( https://nmap.org ) at 2025-07-01 17:59 CEST
+  Nmap scan report for www.adsl.vf (192.168.0.1)
+  Host is up (0.0072s latency).
+  MAC Address: E8:1B:69:45:EE:2A (Sercomm)
+  Nmap scan report for 192.168.0.10
+  Host is up (0.067s latency).
+  MAC Address: BC:10:2F:A6:34:6C (Unknown)
+  Nmap scan report for 192.168.0.11
+  Host is up (0.0078s latency).
+  MAC Address: 10:5A:17:31:33:D5 (Unknown)
+  Nmap scan report for 192.168.0.12
+  Host is up (0.0025s latency).
+  MAC Address: 10:5A:17:30:F0:EC (Unknown)
+  Nmap scan report for 192.168.0.14
+  Host is up (0.053s latency).
+  MAC Address: 70:3E:97:5C:6E:0B (Unknown)
+  Nmap scan report for 192.168.0.17
+  Host is up (0.019s latency).
+  MAC Address: 58:A8:E8:CB:9B:FF (Unknown)
+  Nmap scan report for 192.168.0.22
+  Host is up (0.011s latency).
+  MAC Address: 70:3E:97:5C:2C:D5 (Unknown)
+  Nmap scan report for 192.168.0.25
+  Host is up (0.019s latency).
+  MAC Address: A0:A3:B3:AA:28:BC (Unknown)
+  Nmap scan report for 192.168.0.16
+  Host is up.
+  Nmap done: 256 IP addresses (9 hosts up) scanned in 28.07 seconds
+  ```
+
+  Note that the IP `192.168.0.25` wasn't there before. This is the IP if the ESP32.
+
+  Then you can run the micro-ros agent with
+
+  ```bash
+  ros2 run micro_ros_agent micro_ros_agent udp4 --port 8888 --dev 192.168.0.25
+  ```
